@@ -1,6 +1,6 @@
 "use client";
 import Submit from "./submit_form";
-import styles from "./page.module.css";
+import styles from "@/app/page.module.css";
 import type { CreateLinkReturnData } from "../types/create-link";
 import {
   LinkOutlined,
