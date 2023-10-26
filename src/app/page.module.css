@@ -1,0 +1,43 @@
+.main {
+  @apply min-h-screen container mx-auto flex flex-col items-center justify-center;
+}
+
+.formcard {
+  @apply w-96 dark:bg-gray-900 p-4 rounded-lg shadow-lg bg-white;
+}
+
+.form {
+  @apply flex flex-col gap-4;
+}
+
+.formSection {
+  @apply flex flex-col gap-4;
+}
+
+.formSection > div {
+  @apply flex flex-col gap-1;
+}
+
+.label {
+  @apply tracking-wide text-lg inline-flex items-center gap-2 mb-1;
+}
+
+.input {
+  @apply py-2 px-3 border dark:border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:border-transparent text-black text-lg;
+}
+
+.submit {
+  @apply py-2 px-3 border dark:border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:border-transparent dark:text-white text-lg mt-4 text-gray-700;
+}
+
+.error {
+  @apply text-red-500 text-sm w-full capitalize font-medium tracking-wide;
+}
+
+.action {
+  @apply text-gray-700 text-sm w-full capitalize font-medium tracking-wide;
+}
+
+.iconButton {
+  @apply inline-flex items-center gap-2 cursor-pointer border p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-300;
+}

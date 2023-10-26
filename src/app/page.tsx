@@ -1,113 +1,166 @@
-import Image from 'next/image'
+"use client";
+
+// ts-ignore because experimental_useFormStatus is not in the types
+// @ts-ignore
+import { experimental_useFormState as useFormStateNew } from "react-dom";
+import type { useFormState } from "react-dom";
+
+import Submit from "./components/submit_form";
+import styles from "./page.module.css";
+import submitLink from "./utils/actions/submit-link";
+import type {
+  CreateLinkReturnData,
+  CreateLinkReturnError,
+} from "./types/create-link";
+import Input from "./components/input";
+import {
+  LinkOutlined,
+  EditOutlined,
+  CheckOutlined,
+  CopyOutlined,
+  FileDoneOutlined,
+} from "@ant-design/icons";
+import { useState } from "react";
+import { toast } from "react-toastify";
+
+const initialState: CreateLinkReturnData = {
+  data: null,
+  status: "IDLE",
+};
 
 export default function Home() {
+  const [copied, setCopied] = useState(false);
+  const [state, formAction]: ReturnType<
+    typeof useFormState<typeof initialState, FormData>
+  > = useFormStateNew(submitLink, initialState);
+
+  const showForm = state.status === "IDLE" || state.status === "ERROR";
+  const isSuccess = state.status === "SUCCESS";
+  const errorMessage = !state.error
+    ? undefined
+    : {
+        alias_exists: "Alias already exists",
+        invalid_alias: "Invalid alias",
+        invalid_description: "Invalid description",
+        invalid_title: "Invalid title",
+        invalid_url: "Please enter a valid URL",
+      }[state.error as CreateLinkReturnError];
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className={styles.main}>
+      <div className={styles.formcard}>
+        <div className="p-2">
+          <form className={styles.form} action={formAction}>
+            {showForm && <InputForm errorMessage={errorMessage} />}
+            {isSuccess && (
+              <>
+                <div className={styles.formSection}>
+                  <Input
+                    id="url"
+                    name="url"
+                    type="url"
+                    aria-label="Long Url"
+                    placeholder="Enter long link here"
+                    label="Your long URL"
+                    value={state.data?.link?.toString() ?? ""}
+                    styles={styles}
+                    disabled
+                    leadingIcon={<LinkOutlined />}
+                  />
+                  <Input
+                    id="title"
+                    name="title"
+                    type="text"
+                    aria-label="Custom Title"
+                    placeholder="Enter title"
+                    label="Shortened URL"
+                    value={state.data?.shortUrl?.toString() ?? ""}
+                    styles={styles}
+                    disabled
+                    leadingIcon={<FileDoneOutlined />}
+                  />
+                </div>
+                <div className={styles.action}>
+                  <div
+                    className={styles.iconButton}
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        state.data?.shortUrl?.toString() ?? ""
+                      );
+                      toast.success("Copied to clipboard", {
+                        position: "bottom-right",
+                        hideProgressBar: true,
+                        pauseOnFocusLoss: false,
+                      });
+                      // timeout to allow the user to see the checkmark
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 5000);
+
+                      // show toast
+                    }}
+                  >
+                    {!copied ? <CopyOutlined /> : <CheckOutlined />}
+                  </div>
+                </div>
+                <Submit type="reset" className={styles.submit}>
+                  Shorten Another URL
+                </Submit>
+              </>
+            )}
+          </form>
         </div>
       </div>
+    </main>
+  );
+}
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+function InputForm({ errorMessage }: { errorMessage?: string }) {
+  return (
+    <>
+      <div className={styles.formSection}>
+        <Input
+          id="url"
+          name="url"
+          type="url"
+          aria-label="Long Url"
+          placeholder="Enter long link here"
+          label="Shorten your URL"
+          styles={styles}
+          leadingIcon={<LinkOutlined />}
+        />
+        <Input
+          id="title"
+          name="title"
+          type="text"
+          aria-label="Custom Title"
+          placeholder="Enter title"
+          label="Customize your Link"
+          styles={styles}
+          leadingIcon={<EditOutlined />}
+        />
+        <Input
+          id="description"
+          name="description"
+          type="text"
+          aria-label="Custom Description"
+          placeholder="Enter description"
+          styles={styles}
+        />
+        <Input
+          id="alias"
+          name="alias"
+          type="text"
+          aria-label="Custom Alias"
+          placeholder="Enter alias"
+          styles={styles}
         />
       </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+      {errorMessage && (
+        <div className={styles.error}>
+          <p>{errorMessage}</p>
+        </div>
+      )}
+      <Submit className={styles.submit}>Shorten URL</Submit>
+    </>
+  );
 }
