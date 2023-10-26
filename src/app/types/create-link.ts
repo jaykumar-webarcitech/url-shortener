@@ -14,4 +14,5 @@ export type CreateLinkReturnError =
   | "invalid_alias"
   | "invalid_url"
   | "invalid_title"
-  | "invalid_description";
+  | "invalid_description"
+  | "invalid_formdata";

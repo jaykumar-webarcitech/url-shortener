@@ -2,8 +2,8 @@
 
 // ts-ignore because experimental_useFormStatus is not in the types
 // @ts-ignore
-import { experimental_useFormState as useFormStateNew } from "react-dom";
-import type { useFormState } from "react-dom";
+import { experimental_useFormState as useFormState } from "react-dom";
+import type { useFormState as useFormStateType } from "react-dom";
 
 import styles from "./page.module.css";
 import submitLink from "./utils/actions/submit-link";
@@ -21,8 +21,8 @@ const initialState: CreateLinkReturnData = {
 
 export default function Home() {
   const [state, formAction]: ReturnType<
-    typeof useFormState<typeof initialState, FormData>
-  > = useFormStateNew(submitLink, initialState);
+    typeof useFormStateType<CreateLinkReturnData, FormData | undefined>
+  > = useFormState(submitLink, initialState);
 
   const showForm = state.status === "IDLE" || state.status === "ERROR";
   const isSuccess = state.status === "SUCCESS";
@@ -34,6 +34,7 @@ export default function Home() {
         invalid_description: "Invalid description",
         invalid_title: "Invalid title",
         invalid_url: "Please enter a valid URL",
+        invalid_formdata: "",
       }[state.error as CreateLinkReturnError];
 
   return (
@@ -42,7 +43,9 @@ export default function Home() {
         <div className="p-2">
           <form className={styles.form} action={formAction}>
             {showForm && <InputForm errorMessage={errorMessage} />}
-            {isSuccess && <SuccessState {...state} />}
+            {isSuccess && (
+              <SuccessState {...state} onClick={() => formAction(undefined)} />
+            )}
           </form>
         </div>
       </div>

@@ -11,7 +11,9 @@ import {
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-export function SuccessState(state: CreateLinkReturnData) {
+export function SuccessState(
+  state: CreateLinkReturnData & { onClick: () => void }
+) {
   const [copied, setCopied] = useState(false);
   return (
     <>
@@ -58,7 +60,7 @@ export function SuccessState(state: CreateLinkReturnData) {
           {!copied ? <CopyOutlined /> : <CheckOutlined />}
         </div>
       </div>
-      <Submit type="reset" className={styles.submit}>
+      <Submit type="reset" className={styles.submit} onClick={state.onClick}>
         Shorten Another URL
       </Submit>
     </>
