@@ -1,3 +1,5 @@
+"use server";
+
 export default function formatLog(val: string) {
   const separator = "=".repeat(20);
   const padding = " ".repeat(10);

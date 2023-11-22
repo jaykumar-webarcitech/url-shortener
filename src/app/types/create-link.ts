@@ -1,10 +1,10 @@
 export interface CreateLinkReturnData {
-  data: {
+  data?: {
     shortUrl: any;
-    link: FormDataEntryValue | null;
+    link?: string;
     created: boolean;
     update: boolean;
-  } | null;
+  };
   error?: CreateLinkReturnError;
   status: "SUCCESS" | "ERROR" | "IDLE";
 }

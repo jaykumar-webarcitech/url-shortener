@@ -1,4 +1,3 @@
-"use client";
 import Submit from "./submit_form";
 import styles from "@/app/page.module.css";
 import type { CreateLinkReturnData } from "../types/create-link";
@@ -11,9 +10,7 @@ import {
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-export function SuccessState(
-  state: CreateLinkReturnData & { onClick: () => void }
-) {
+export function SuccessState(state: CreateLinkReturnData) {
   const [copied, setCopied] = useState(false);
   return (
     <>
@@ -60,7 +57,7 @@ export function SuccessState(
           {!copied ? <CopyOutlined /> : <CheckOutlined />}
         </div>
       </div>
-      <Submit type="reset" className={styles.submit} onClick={state.onClick}>
+      <Submit type="reset" className={styles.submit}>
         Shorten Another URL
       </Submit>
     </>

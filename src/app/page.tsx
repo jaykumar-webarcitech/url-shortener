@@ -1,9 +1,6 @@
 "use client";
 
-// ts-ignore because experimental_useFormStatus is not in the types
-// @ts-ignore
-import { experimental_useFormState as useFormState } from "react-dom";
-import type { useFormState as useFormStateType } from "react-dom";
+import { useFormState } from "react-dom";
 
 import styles from "./page.module.css";
 import submitLink from "./utils/actions/submit-link";
@@ -15,14 +12,14 @@ import { SuccessState } from "./components/SuccessState";
 import { InputForm } from "./components/InputForm";
 
 const initialState: CreateLinkReturnData = {
-  data: null,
   status: "IDLE",
 };
 
 export default function Home() {
-  const [state, formAction]: ReturnType<
-    typeof useFormStateType<CreateLinkReturnData, FormData | undefined>
-  > = useFormState(submitLink, initialState);
+  const [state, formAction] = useFormState<
+    CreateLinkReturnData,
+    FormData | undefined
+  >(submitLink, initialState);
 
   const showForm = state.status === "IDLE" || state.status === "ERROR";
   const isSuccess = state.status === "SUCCESS";
@@ -41,11 +38,16 @@ export default function Home() {
     <main className={styles.main}>
       <div className={styles.formcard}>
         <div className="p-2">
-          <form className={styles.form} action={formAction}>
-            {showForm && <InputForm errorMessage={errorMessage} />}
-            {isSuccess && (
-              <SuccessState {...state} onClick={() => formAction(undefined)} />
+          <form
+            className={styles.form}
+            action={(payload) => {
+              formAction(payload);
+            }}
+          >
+            {showForm && (
+              <InputForm errorMessage={errorMessage} key={"INPUT_FORM"} />
             )}
+            {isSuccess && <SuccessState {...state} />}
           </form>
         </div>
       </div>

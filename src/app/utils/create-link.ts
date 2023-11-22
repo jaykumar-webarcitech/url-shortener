@@ -4,7 +4,7 @@ import { filterDifferentKeys } from "./filterDifferentKeys";
 import { CreateLinkReturnData } from "../types/create-link";
 import type { WithId, Document } from "mongodb";
 
-export enum COLLECTION_NAMES {
+enum COLLECTION_NAMES {
   "url-info" = "url-info",
 }
 
@@ -22,18 +22,17 @@ export default async function createLink(
     const alias = props.get("alias");
     const database = await connectToDatabase();
     const urlInfoCollection = database.collection(COLLECTION_NAMES["url-info"]);
-    let linkExists: WithId<Document> | null;
+    let linkExists: WithId<Document> | undefined;
     if (!!alias) {
-      linkExists = await urlInfoCollection.findOne({ alias });
+      linkExists = (await urlInfoCollection.findOne({ alias })) ?? undefined;
       if (!!linkExists) {
         return {
-          data: null,
           status: "ERROR",
           error: "alias_exists",
         };
       }
     } else {
-      linkExists = await urlInfoCollection.findOne({ link });
+      linkExists = (await urlInfoCollection.findOne({ link })) ?? undefined;
     }
 
     const hash = alias ?? getHash();
@@ -44,15 +43,16 @@ export default async function createLink(
         ...payload,
         createdAt: new Date(),
       });
-      return {
+      const rpayload = {
         data: {
           shortUrl: shortUrl,
-          link,
+          link: link as string,
           created: created.acknowledged,
           update: false,
         },
         status: "SUCCESS",
-      };
+      } satisfies CreateLinkReturnData;
+      return rpayload;
     } else {
       const diffObj = filterDifferentKeys(payload, linkExists);
       if (Object.keys(diffObj).length) {
@@ -70,7 +70,7 @@ export default async function createLink(
         return {
           data: {
             shortUrl: linkExists?.shortUrl || shortUrl,
-            link,
+            link: link as string,
             created: false,
             update: update.acknowledged,
             ...diffObj,
@@ -83,7 +83,7 @@ export default async function createLink(
     return {
       data: {
         shortUrl: linkExists?.shortUrl || shortUrl,
-        link,
+        link: link as string,
         created: !linkExists,
         update: false,
       },
@@ -91,7 +91,6 @@ export default async function createLink(
     };
   } catch (e: any) {
     return {
-      data: null,
       status: "ERROR",
       error: e,
     };
