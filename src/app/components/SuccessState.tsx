@@ -9,8 +9,10 @@ import {
 } from "@ant-design/icons";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export function SuccessState(state: CreateLinkReturnData) {
+  const { refresh } = useRouter();
   const [copied, setCopied] = useState(false);
   return (
     <>
@@ -57,7 +59,7 @@ export function SuccessState(state: CreateLinkReturnData) {
           {!copied ? <CopyOutlined /> : <CheckOutlined />}
         </div>
       </div>
-      <Submit type="reset" className={styles.submit}>
+      <Submit type="reset" className={styles.submit} onClick={() => refresh()}>
         Shorten Another URL
       </Submit>
     </>
