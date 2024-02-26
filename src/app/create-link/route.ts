@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import createLink from "../utils/create-link";
+import { CreateLinkReturnError } from "../types/create-link";
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -20,7 +21,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       type: "Error",
       code: 500,
-      message: "Failed to create",
+      message: {
+        alias_exists: "Alias already exists",
+        invalid_alias: "Invalid alias",
+        invalid_description: "Invalid description",
+        invalid_title: "Invalid title",
+        invalid_url: "Please enter a valid URL",
+        invalid_formdata: "",
+      }[data.error as CreateLinkReturnError],
+      error_code: data.error,
       status: 500,
     });
   }

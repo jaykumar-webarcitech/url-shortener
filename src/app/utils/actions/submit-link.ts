@@ -5,7 +5,7 @@ import createLink from "../create-link";
 
 export default async function submitLink(
   _: CreateLinkReturnData | undefined,
-  formdata?: FormData
+  formdata?: FormData,
 ): Promise<CreateLinkReturnData> {
   try {
     if (!formdata) {

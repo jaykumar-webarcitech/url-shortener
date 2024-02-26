@@ -1,5 +1,18 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import getLinkData from "../utils/get-link";
+import getAllAliases from "../utils/get-all-aliases";
+import type { WithId, Document } from "mongodb";
+
+type Props = {
+  params: { alias: string } & WithId<Document>;
+};
+
+export async function generateStaticParams() {
+  const allAliases = await getAllAliases();
+  return allAliases
+    .map((data) => ({ alias: data.alias as string | undefined }))
+    .filter((data) => !!data.alias);
+}
 
 export default function DashboardLayout({
   children,
@@ -9,13 +22,9 @@ export default function DashboardLayout({
   return <section>{children}</section>;
 }
 
-type Props = {
-  params: { alias: string };
-};
-
 export async function generateMetadata(
   { params: { alias } }: Props,
-  _: ResolvingMetadata
+  _: ResolvingMetadata,
 ): Promise<Metadata> {
   const parent = await _;
   const linkData = await getLinkData(alias);
